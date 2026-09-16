@@ -1,0 +1,4 @@
+interface:
+  display_name: "Playwright Video"
+  short_description: "Record clear browser videos with visible checks"
+  default_prompt: "Use $playwright-video to record a short, verified video of this browser flow."
