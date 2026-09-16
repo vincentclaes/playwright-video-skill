@@ -22,39 +22,30 @@ and overlays; that viewer and its review panel are not included.
 
 ## Install
 
-Clone this repo:
+- Clone this repo:
 
 ```sh
 git clone https://github.com/vincentclaes/playwright-video-skill.git
 ```
 
-Copy `skills/playwright-video` into your project's folder below:
+- Copy `skills/playwright-video` into your app's agent folder below.
+- Reload your agent if needed.
 
-| Agent | Folder | Docs |
-| --- | --- | --- |
-| Codex | `.agents/skills/` | [Setup](https://developers.openai.com/codex/skills/) |
-| Claude Code | `.claude/skills/` | [Setup](https://code.claude.com/docs/en/skills) |
-| Cursor | `.cursor/skills/` | [Setup](https://cursor.com/docs/skills) |
-| GitHub Copilot | `.github/skills/` | [Setup](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills) |
+## Agents
 
-For example, run this from your app's folder, adjusting the source path:
-
-```sh
-mkdir -p .agents/skills
-cp -R /path/to/playwright-video-skill/skills/playwright-video .agents/skills/
-```
-
-Reload your agent if needed. Other agents can read `SKILL.md` directly.
+- [Codex](https://developers.openai.com/codex/skills/): `.agents/skills/`
+- [Claude Code](https://code.claude.com/docs/en/skills): `.claude/skills/`
+- [Cursor](https://cursor.com/docs/skills): `.cursor/skills/`
+- [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/customize-cloud-agent/add-skills): `.github/skills/`
+- Other agents: ask them to read `skills/playwright-video/SKILL.md`.
 
 ## Use
 
-Ask your agent:
+- Needs terminal access, Playwright, and a browser.
+- Use test accounts and sample data.
+- Tell your agent what to record and check:
 
-> Use the playwright-video skill to record the checkout flow on localhost.
-> Show the cart total, place a test order, and check the confirmation.
-
-Your agent needs terminal access, Playwright, and a browser. It uses your app's
-existing tests and setup. Use test accounts and safe sample data.
+> Use playwright-video to record checkout on localhost. Check the total and order confirmation.
 
 ## Try the demo
 
