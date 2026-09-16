@@ -9,6 +9,12 @@ Teach your coding agent to record short, clear videos of a web app.
 
 Works with any web app. No cloud account or backend required.
 
+## Demo video
+
+![Demo: edit a profile, check the name, and confirm the save](docs/images/demo.gif)
+
+[Watch or download the full video](docs/videos/demo.webm).
+
 ## What it looks like
 
 ![Example recording with a checklist overlay and a highlighted sign-in button](docs/images/recording-example.png)
