@@ -9,6 +9,17 @@ Teach your coding agent to record short, clear videos of a web app.
 
 Works with any web app. No cloud account or backend required.
 
+## What it looks like
+
+![Example recording with a checklist overlay and a highlighted sign-in button](docs/images/recording-example.png)
+
+- **Checklist:** shows what the test checks and marks the current step.
+- **Highlight:** points to the part of the page to look at.
+- **Review panel:** gives the reviewer context, issue links, and things to check.
+
+This example uses a separate video viewer. The skill provides the recording
+and overlays; that viewer and its review panel are not included.
+
 ## Install
 
 Clone this repo:
