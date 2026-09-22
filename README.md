@@ -11,7 +11,9 @@ Works with any web app. No cloud account or backend required.
 
 ## Demo video
 
-![Demo: edit a profile, check the name, and confirm the save](docs/images/demo.gif)
+Watch the name being edited, saved, changed again, and saved a second time.
+
+![Demo: type two profile edits and check both save confirmations](docs/images/demo.gif)
 
 [Watch or download the full video](docs/videos/demo.webm).
 
