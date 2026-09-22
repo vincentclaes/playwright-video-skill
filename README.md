@@ -11,9 +11,9 @@ Works with any web app. No cloud account or backend required.
 
 ## Demo video
 
-Watch the name being edited, saved, changed again, and saved a second time.
+Watch a task row being added, then updated with a new title, owner, and status.
 
-![Demo: type two profile edits and check both save confirmations](docs/images/demo.gif)
+![Demo: add a task row, edit it, and save the changes](docs/images/demo.gif)
 
 [Watch or download the full video](docs/videos/demo.webm).
 
@@ -54,6 +54,8 @@ npx playwright install chromium
 npm test
 npm run report
 ```
+
+Open [the demo page](skills/playwright-video/assets/demo.html) locally to try the editable table. Changes reset on reload.
 
 No app server is needed. Add `-- --headed` to `npm test` to watch the browser.
 Videos are in `test-results/`; the report is in `playwright-report/`.

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project tasks · Recording demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #eef2f7; color: #182338; font: 18px/1.5 system-ui, sans-serif; }
+    main { width: min(1080px, calc(100% - 48px)); margin: 170px auto 32px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; gap: 20px; }
+    h1 { margin: 0; font-size: 32px; letter-spacing: -1px; }
+    p { margin: 4px 0 0; color: #526078; }
+    button, input, select { font: inherit; border-radius: 8px; padding: 9px 12px; }
+    button { background: #2449af; color: white; border: 1px solid #2449af; cursor: pointer; white-space: nowrap; }
+    button.secondary { color: #2449af; background: white; border-color: #ccd5e3; }
+    button:disabled { opacity: .5; cursor: default; }
+    :focus-visible { outline: 3px solid #7b9bff; outline-offset: 3px; }
+    .table-wrap { overflow-x: auto; background: white; border: 1px solid #d9e0eb; border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 850px; }
+    th { text-align: left; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #526078; background: #f8fafc; }
+    th, td { padding: 16px; border-bottom: 1px solid #e6ebf2; }
+    tr:last-child td { border-bottom: 0; }
+    th:first-child { width: 34%; } th:nth-child(2) { width: 18%; } th:nth-child(3) { width: 22%; }
+    input, select { width: 100%; min-width: 0; border: 1px solid #8291aa; color: inherit; background: white; }
+    .actions { display: flex; gap: 8px; }
+    .badge { display: inline-block; border-radius: 20px; padding: 4px 12px; background: #eef2f7; font-size: 15px; }
+    .badge[data-status="In progress"] { background: #fff0c7; color: #785600; }
+    .badge[data-status="Done"] { background: #dcf5e8; color: #16603b; }
+    [role="status"] { min-height: 32px; margin-top: 18px; color: #16603b; font-weight: 600; }
+    .note { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><div><h1>Project tasks</h1><p>Add a task, edit the row, and save your changes.</p></div><button id="add" type="button">+ Add task</button></header>
+    <form id="editor">
+      <div class="table-wrap"><table aria-label="Project tasks">
+        <thead><tr><th scope="col">Task</th><th scope="col">Owner</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </form>
+    <div role="status" aria-live="polite"></div>
+    <p class="note">Sample data · Changes stay in this tab and reset when you reload.</p>
+  </main>
+  <template id="view-row"><tr><td data-field="title"></td><td data-field="owner"></td><td><span class="badge" data-field="status"></span></td><td><button type="button" class="secondary">Edit</button></td></tr></template>
+  <template id="edit-row"><tr><td><input name="title" aria-label="Task title" required maxlength="60"></td><td><input name="owner" aria-label="Owner" required maxlength="30"></td><td><select name="status" aria-label="Status"><option>To do</option><option>In progress</option><option>Done</option></select></td><td><div class="actions"><button type="submit">Save</button><button type="button" class="secondary">Cancel</button></div></td></tr></template>
+  <script>
+    const tasks = [
+      { title: 'Plan the kickoff', owner: 'Sam', status: 'Done' },
+      { title: 'Prepare the demo', owner: 'Morgan', status: 'In progress' },
+    ];
+    const body = document.querySelector('tbody');
+    const form = document.querySelector('form');
+    const add = document.querySelector('#add');
+    const message = document.querySelector('[role="status"]');
+    let editing = null;
+
+    function render() {
+      body.replaceChildren();
+      const rows = editing === tasks.length ? [...tasks, { title: '', owner: '', status: 'To do' }] : tasks;
+      rows.forEach((task, index) => {
+        const active = editing === index;
+        const row = document.querySelector(active ? '#edit-row' : '#view-row').content.firstElementChild.cloneNode(true);
+        for (const field of ['title', 'owner', 'status']) {
+          if (active) row.querySelector(`[name="${field}"]`).value = task[field];
+          else row.querySelector(`[data-field="${field}"]`).textContent = task[field];
+        }
+        if (active) {
+          row.querySelector('[type="button"]').onclick = () => { editing = null; render(); add.focus(); };
+        } else {
+          row.querySelector('.badge').dataset.status = task.status;
+          row.querySelector('button').disabled = editing !== null;
+          row.querySelector('button').onclick = () => { editing = index; message.textContent = ''; render(); form.elements.title.focus(); };
+        }
+        body.append(row);
+      });
+      add.disabled = editing !== null;
+    }
+    add.onclick = () => { editing = tasks.length; message.textContent = ''; render(); form.elements.title.focus(); };
+    form.onsubmit = event => {
+      event.preventDefault();
+      if (editing === null) return;
+      const data = new FormData(form);
+      const task = { title: data.get('title').trim(), owner: data.get('owner').trim(), status: data.get('status') };
+      if (!task.title || !task.owner) { message.textContent = 'Enter a task title and owner.'; return; }
+      const created = editing === tasks.length;
+      tasks[editing] = task;
+      editing = null;
+      render();
+      message.textContent = `${created ? 'Added' : 'Updated'}: ${task.title}`;
+      add.focus();
+    };
+    render();
+  </script>
+</body>
+</html>

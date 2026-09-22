@@ -61,8 +61,9 @@ Pass the full criteria list, the active zero-based index, and a target locator.
 The helper adds temporary recording-only elements and removes them afterward.
 Keep assertions outside the overlay so its text cannot make a test pass.
 
-[assets/demo.spec.ts](assets/demo.spec.ts) is a self-contained working example.
-Its fake page demonstrates recording only; replace it with the real app flow
+[assets/demo.spec.ts](assets/demo.spec.ts) records adding and updating a row in
+[assets/demo.html](assets/demo.html). Keep both files together when copying the demo.
+Its sample page demonstrates recording only; replace it with the real app flow
 when collecting evidence. Do not report the demo as validation of the app.
 
 ## Record and inspect

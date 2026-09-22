@@ -1,78 +1,65 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { checkpoint } from './checkpoint';
 
 const criteria = [
-  'The name changes to Alex Morgan',
-  'First save confirms Alex Morgan',
-  'Second save confirms Alex Taylor',
+  'A new task appears in the table',
+  'The same row gets a new title and owner',
+  'The updated task is marked Done',
 ];
 
-test('Update a profile and check the confirmation', async ({ page }) => {
-  test.setTimeout(45_000);
-  // Self-contained demo only. Use page.goto(...) and real assertions in your app.
-  await page.setContent(`
-    <html lang="en"><head><title>Profile demo</title><style>
-      body { margin:0; background:#eef2f7; color:#182338; font:22px system-ui }
-      main { margin:80px auto; padding:36px; width:520px; background:white; border-radius:20px }
-      h1 { margin:0 0 24px } label { display:block; margin-bottom:10px }
-      input, button { font:inherit; padding:12px; border-radius:8px }
-      input { width:calc(100% - 28px); border:2px solid #8291aa }
-      button { margin-top:20px; background:#2449af; color:white; border:0 }
-      output { display:block; margin-top:24px; color:#176b46; font-weight:700 }
-    </style></head><body><main>
-      <h1>Your profile</h1><label for="name">Name</label><input id="name" value="Sam">
-      <button onclick="document.querySelector('output').textContent = 'Saved for ' + document.querySelector('input').value">Save profile</button>
-      <output aria-label="Save result"></output>
-    </main></body></html>
-  `);
-  const name = page.getByRole('textbox', { name: 'Name' });
-  const save = page.getByRole('button', { name: 'Save profile' });
-  const result = page.getByLabel('Save result');
+test('Add a table row and save an update', async ({ page }) => {
+  test.setTimeout(60_000);
+  // Standalone demo only. Navigate to your real app when collecting app evidence.
+  await page.setContent(readFileSync(join(__dirname, 'demo.html'), 'utf8'));
+  const table = page.getByRole('table', { name: 'Project tasks' });
+  const rows = table.locator('tbody tr');
+  const title = page.getByRole('textbox', { name: 'Task title' });
+  const owner = page.getByRole('textbox', { name: 'Owner' });
+  const status = page.getByRole('combobox', { name: 'Status' });
 
-  await test.step('Show the starting profile', async () => {
-    await expect(name).toHaveValue('Sam');
-    await checkpoint(page, 'Start: the current name is Sam', {
-      criteria, target: name, holdMs: 2200,
-    });
+  await test.step('Show the starting table', async () => {
+    await expect(rows).toHaveCount(2);
+    await checkpoint(page, 'Start with two tasks', { criteria, target: table, holdMs: 1800 });
   });
-  await test.step('Type a new name', async () => {
-    await name.click();
-    await name.selectText();
-    await page.waitForTimeout(600); // Let the viewer see the selected text.
-    await name.press('Backspace');
-    await name.pressSequentially('Alex Morgan', { delay: 140 });
-    await expect(name).toHaveValue('Alex Morgan');
-    await checkpoint(page, '1. Name changed — ready to save', {
-      criteria, active: 0, target: name, holdMs: 2200,
-    });
+  await test.step('Add a task with a title and owner', async () => {
+    await page.getByRole('button', { name: '+ Add task', exact: true }).click();
+    await title.pressSequentially('Write launch notes', { delay: 95 });
+    await owner.click();
+    await owner.pressSequentially('Alex', { delay: 130 });
+    await status.selectOption('To do');
+    await expect(title).toHaveValue('Write launch notes');
+    await expect(owner).toHaveValue('Alex');
+    await checkpoint(page, 'Fill in the new row', { criteria, target: rows.last(), holdMs: 1800 });
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(rows).toHaveCount(3);
+    await expect(rows.last().getByRole('cell')).toHaveText(['Write launch notes', 'Alex', 'To do', 'Edit']);
+    await expect(page.getByRole('status')).toHaveText('Added: Write launch notes');
+    await checkpoint(page, '1. New row saved', { criteria, active: 0, target: rows.last(), holdMs: 2200 });
   });
-  await test.step('Save the new name', async () => {
-    await save.hover();
-    await save.click();
-    await expect(result).toHaveText('Saved for Alex Morgan');
-    await checkpoint(page, '2. First save confirmed', {
-      criteria, active: 1, target: result, holdMs: 2200,
-    });
+  await test.step('Edit the row that was just added', async () => {
+    await rows.last().getByRole('button', { name: 'Edit', exact: true }).click();
+    await title.selectText();
+    await title.press('Backspace');
+    await title.pressSequentially('Review launch notes', { delay: 95 });
+    await owner.click();
+    await owner.selectText();
+    await owner.press('Backspace');
+    await owner.pressSequentially('Jamie', { delay: 130 });
+    await status.selectOption('Done');
+    await expect(title).toHaveValue('Review launch notes');
+    await expect(owner).toHaveValue('Jamie');
+    await expect(status).toHaveValue('Done');
+    await checkpoint(page, 'Change the title, owner, and status', { criteria, target: rows.last(), holdMs: 1800 });
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(rows).toHaveCount(3);
+    await expect(rows.last().getByRole('cell')).toHaveText(['Review launch notes', 'Jamie', 'Done', 'Edit']);
+    await expect(page.getByRole('status')).toHaveText('Updated: Review launch notes');
+    await expect(rows.first().getByRole('cell')).toHaveText(['Plan the kickoff', 'Sam', 'Done', 'Edit']);
+    await expect(rows.nth(1).getByRole('cell')).toHaveText(['Prepare the demo', 'Morgan', 'In progress', 'Edit']);
+    await checkpoint(page, '2. Changes saved in the same row', { criteria, active: 1, target: rows.last(), holdMs: 2200 });
+    await checkpoint(page, '3. Updated task is Done', { criteria, active: 2, target: rows.last().getByText('Done', { exact: true }), holdMs: 2200 });
   });
-  await test.step('Edit the name again', async () => {
-    await name.click();
-    await name.selectText();
-    await page.waitForTimeout(600); // Show the second edit before replacing it.
-    await name.press('Backspace');
-    await name.pressSequentially('Alex Taylor', { delay: 140 });
-    await expect(name).toHaveValue('Alex Taylor');
-    await checkpoint(page, 'Now change the name to Alex Taylor', {
-      criteria, target: name, holdMs: 2200,
-    });
-  });
-  await test.step('Save the second edit', async () => {
-    await save.hover();
-    await save.click();
-    await expect(result).toHaveText('Saved for Alex Taylor');
-    await checkpoint(page, '3. Second save confirmed', {
-      criteria, active: 2, target: result, holdMs: 2800,
-    });
-  });
-  // The helper must not leave its caption or highlight in the app.
   await expect(page.locator('[data-playwright-video-checkpoint]')).toHaveCount(0);
 });
