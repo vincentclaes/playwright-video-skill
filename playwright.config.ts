@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './skills/playwright-video/assets',
-  testMatch: 'demo.spec.ts',
+  testMatch: '*.spec.ts',
   workers: 1,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],

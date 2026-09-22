@@ -4,14 +4,14 @@ Teach your coding agent to record short, clear videos of a web app.
 
 - Show each step at a readable pace.
 - Check the result before showing a checkpoint.
-- Add a small checklist and highlight what matters.
+- Keep the checklist visible: pending → checking → passed (or failed).
 - Save a WebM video and a Playwright report.
 
 Works with any web app. No cloud account or backend required.
 
 ## Demo video
 
-Watch a task row being added, then updated with a new title, owner, and status.
+Watch a task row being added and updated. The checklist stays visible and ticks off each verified result.
 
 ![Demo: add a task row, edit it, and save the changes](docs/images/demo.gif)
 

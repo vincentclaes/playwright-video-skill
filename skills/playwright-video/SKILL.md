@@ -48,18 +48,42 @@ need it; keep assertion timeouts focused on app readiness.
 - Assert exact visible outcomes: totals, labels, statuses, or saved field values.
 - Scroll the relevant element into view. Select editable text or hover a safe
   target when useful; never click a destructive control just to point at it.
-- Add a checkpoint after the assertion. Keep its checklist short and highlight
-  the current item. Do not present unchecked criteria as passed.
+- Show the full acceptance checklist before the first action and keep it visible
+  throughout the flow, including typing, clicking, and saving.
+- Mark the current criterion as Checking while its assertions run, then Passed
+  only after they succeed. Keep earlier checkmarks visible. On failure, show
+  Failed and propagate the error; never turn a failed assertion into a tick.
 - Hold important states for about 1–2 seconds for the viewer. These pauses are
   for reading, not readiness; use Playwright assertions to wait for the app.
 - For persistence claims, reload and check the UI; use backend checks afterward
   when needed. Video alone does not prove database state.
 
-For an optional caption, checklist, and spotlight, copy
-[assets/checkpoint.ts](assets/checkpoint.ts) into the project's test helpers.
-Pass the full criteria list, the active zero-based index, and a target locator.
-The helper adds temporary recording-only elements and removes them afterward.
-Keep assertions outside the overlay so its text cannot make a test pass.
+Copy [assets/checkpoint.ts](assets/checkpoint.ts) into the test helpers.
+Create one checklist per recorded page and keep the same instance throughout:
+
+```ts
+const checklist = createChecklist(page, ['The saved row shows the new title']);
+await checklist.show('Acceptance criteria');
+// Perform the UI actions while the checklist stays visible.
+await saveButton.click();
+await checklist.check(0, async () => {
+  await expect(rowTitle).toHaveText('Review launch notes');
+}, { target: rowTitle });
+await checklist.show('All checks passed', { holdMs: 2000 });
+```
+
+Use `show(title)` to change the caption without clearing results. Use
+`check(index, assertion, { target, holdMs })` to show Checking, run the assertion,
+and record Passed or Failed. Indexes are zero-based. Do not catch assertion
+failures just to complete the video. The checklist remains until the page closes.
+Keep the final summary visible for a moment before the test ends.
+
+Scope app assertions to app elements: overlay text must never satisfy them.
+The fixed panel belongs to the recording, not product code; position it away
+from the app controls. After full navigation or replacing the document, call
+`show()` immediately on the same instance to reattach it with previous results.
+There is no overlay during a document load; prefer one-page flows when an
+uninterrupted checklist is required. SPA updates do not need reattachment.
 
 [assets/demo.spec.ts](assets/demo.spec.ts) records adding and updating a row in
 [assets/demo.html](assets/demo.html). Keep both files together when copying the demo.
